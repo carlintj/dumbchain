@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    //"downlevelIteration": true,
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true,
+    "module": "es2015",
+    "moduleResolution": "node",
+     "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es5",
+      "es2015.promise"
+    ]
+
+
+  },
+  "files": [
+    "typings/custom.d.ts"
+  ]
+
+}
