@@ -4,7 +4,7 @@ import * as ReactDOM from "react-dom";
 
 interface PropTypes {
     index : number;
-    value: string;
+    value?: string;
     nonce: number;
     hash: string;
 }
@@ -18,7 +18,9 @@ const style = {
   };
   
 const BlockDisplay: React.SFC<PropTypes> = (props) => {
-    return <Paper style={style}>{props.value}</Paper>;
+    return <Paper style={style}>
+        {props.nonce}-{props.hash}
+    </Paper>;
 }
 
 

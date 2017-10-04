@@ -4,22 +4,33 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     //"downlevelIteration": true,
-    "target": "es5",
+    "target": "es6",
     "jsx": "react",
-    "allowJs": true,
     "module": "es2015",
     "moduleResolution": "node",
-     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,    
+    "experimentalDecorators": true,
+    "allowJs": true
+    /*
     "lib": [
       "dom",
       "es5",
       "es2015.promise"
     ]
+    */
 
 
   },
-  "files": [
-    "typings/custom.d.ts"
+
+  "exclude": [
+      "node_modules"
   ]
 
 }
+
+
+/*
+"files": [
+  "typings/custom.d.ts", 
+],
+*/

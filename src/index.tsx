@@ -1,60 +1,54 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import * as Operator from './operator'
-import { observable  } from 'mobx';
+import Operator from './operator'
+import { observable, action, useStrict } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import Block from './models/block';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import BlockDisplay from './components/BlockDisplay'
+import MinerControls from './components/MinerControls';
+import BlockChainDisplay from './components/BlockChainDisplay'
 import * as _ from 'lodash'
+import ChainStore from './stores/ChainStore';
 
-class ChainStore {
-    @observable minedBlocks : Block[];
-}
+useStrict(true);
 
-const appState = new ChainStore();
-appState.minedBlocks = observable.array([]);
-
-const TodoView = observer(class TodoView extends React.Component<{appState : ChainStore}> {
-      render() {
-        let ed = "";
-        let blocks = _.map(this.props.appState.minedBlocks, (block: Block) => 
-            <BlockDisplay 
-                key={block.index}
-                value="value"
-                index={block.index}
-                nonce={block.nonce}
-                hash={block.hash}
-
-            />);
-        return <div>{blocks}</div>;
-    }
-});
+let chainStore = new ChainStore();
 
 let postMessage = (message: any) => {
-    console.log(message);
-    let {type} = message;
-    switch(type) {
+    let { type } = message;
+    switch (type) {
         case 'FOUND':
-            let {nonce, hash} = message.payload;
-            appState.minedBlocks.push({
+            let { nonce, hash } = message.payload;
+            chainStore.postBlock({
                 data: "ed",
                 nonce,
-                hash 
+                hash,
+                index: chainStore.minedBlocks.length
             });
             break;
     }
 };
 
-let workers = Operator.createWorkers(2,postMessage);
-Operator.startMining(workers, 'foo')
+let operator = new Operator(chainStore, postMessage);
+//operator.startMining(chainStore.value,chainStore.numberOfMiners);
+
+const App = observer(class App extends React.Component<{ appState: ChainStore }> {
+    render() {
+        let { submitInputValues, minedBlocks, mine } = this.props.appState;
+        return (<div>
+            <MinerControls {...this.props.appState} submitInputValues={submitInputValues} mine={mine} />
+            <BlockChainDisplay blocks={minedBlocks} />
+        </div>);
+    }
+});
 
 ReactDOM.render(
     <MuiThemeProvider>
-        <div>   
-            <TodoView appState={appState}/>
+        <div>
+            <App appState={chainStore} />
         </div>
     </MuiThemeProvider>
-,
+    ,
     document.getElementById('root')
 );

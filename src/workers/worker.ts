@@ -6,12 +6,10 @@ self.onmessage = (e) => {
     let {type, payload} = e.data;
     switch(type) {
         case 'START':
-            let {text, seed, increment} = payload;
-            console.log("Starting worker:", text, seed, increment);
-            miner.start(text,seed, increment, 10000, self.postMessage)
+            let {text, seed, increment, difficulty} = payload;
+            miner.start(text,seed, increment, 10000, difficulty, self.postMessage)
             break;
         case 'CANCEL':
-            console.log('canceling');
             miner.stop();
             break;
     }

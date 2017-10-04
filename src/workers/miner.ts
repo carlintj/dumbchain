@@ -7,15 +7,15 @@ class Miner {
         
     }
     
-    start(text : string, seed : number, incrementAmt : number, checkAmount : number, postMessage : any) {
+    start(text : string, seed : number, incrementAmt : number, checkAmount : number,difficulty: number, postMessage : any) {
         this.working = true;
-        this.mine(text,seed, incrementAmt, checkAmount,postMessage);
+        this.mine(text,seed, incrementAmt, checkAmount,difficulty, postMessage);
     }
     
-    mine(text : string, seed : number, incrementAmt : number, checkAmount : number, postMessage : any) {
+    mine(text : string, seed : number, incrementAmt : number, checkAmount : number,difficulty: number, postMessage : any) {
         let nonce = seed -= incrementAmt;
         let checked = 0;
-        let goal = "00000";
+        let goal = "0".repeat(difficulty);
         let foundHash = false;
         do {
             nonce += incrementAmt;
@@ -34,7 +34,7 @@ class Miner {
             postMessage(message);
         }
         else if(this.working){
-            setTimeout(() => this.mine(text,nonce, incrementAmt, checkAmount,postMessage), 5);
+            setTimeout(() => this.mine(text,nonce, incrementAmt, checkAmount,difficulty,postMessage), 5);
         }
     }
     

@@ -1,76 +1,88 @@
 import * as _ from 'lodash'
 import * as Worker from 'worker-loader!./workers/worker';
+import ChainStore from './stores/ChainStore'
 
+class Operator {
+  store : ChainStore;
+  workers: Worker[];
+  isMining: boolean = false;
+  postMessage: (payload: any) => void;
 
-export function startMining(workers : Worker[], value: string) {
-  let workerCount = workers.length;
-  let i = 0;
-  for(const worker of workers) {
-     const state = { 
-      type: 'START',
-      payload: {
-        text: value,
-        seed: i,
-        increment: workerCount
-      }
-    };
-    
-    worker.postMessage(state);
-    i++;
+  constructor(store: ChainStore, postMessage: (payload: any) => void) {
+    this.store = store;
+    this.postMessage = postMessage;
+    setTimeout(this.storeWatcher, 1000);
+  }
+
+  storeWatcher = () => {
+    if(this.store.isMining && !this.isMining) {
+      let {value, numberOfMiners} = this.store;
+      this.startMining(value, numberOfMiners);
+    }
+    setTimeout(this.storeWatcher, 1000);
+  }
+
+  startMining(value: string, workerCount: number) {
+    this.workers = this.createWorkers(workerCount);
+    this.isMining = true;
+    let i = 0;
+    for(const worker of this.workers) {
+       const state = { 
+        type: 'START',
+        payload: {
+          text: value + this.store.minedBlocks.length,
+          seed: i,
+          increment: workerCount,
+          difficulty: this.store.difficulty
+        }
+      };
+      
+      worker.postMessage(state);
+      i++;
+    }
+  }
+
+  stopMining() {
+    this.isMining = false;
+    let message = {
+      type: 'CANCEL'
+    }
+    for(const worker of this.workers) {
+      worker.postMessage(message);
+    }
+  }
+
+  createWorkers(workerCount : number) {
+    this.workers = [];
+    for(let i = 0; i < workerCount; i++) {
+      const worker = new Worker();
+      this.workers[i] = worker;
+        
+      worker.addEventListener(
+        'message',
+        workerHandler.bind(null, this.postMessage, this.stopMining.bind(this))
+      );
+    }
+    return this.workers;
   }
 }
 
 //handles messages from workers
 //needs to pass messages back to store
-export function workerHandler(postMessage : (payload: any) => void,event : any) {
+function workerHandler(postMessage : (payload: any) => void,stopMining : () => void, event : any) {
   let {type, payload} = event.data;
         switch(type) {
           case 'FINISHED':
             let {nonce, hash} = payload;
-            console.log(nonce, hash);
             
             let message = {
               type: 'FOUND', 
               payload
             }
             postMessage(message);
-            
-            let output = document.getElementById('output');
-            let element = document.createElement("div");
-            element.innerHTML = `Found hash ${hash} using nonce ${nonce}`;
-            
-            output.appendChild(element);
-            //startMining(workers, thingtoFind + nonce);
+            stopMining();
             break;
       }
 }
 
-export function createWorkers(workerCount : number, postMessage : (payload: any) => void) {
-  
-  let workers : Worker[] = [];
-  for(let i = 0; i < workerCount; i++) {
-    const worker = new Worker();
-   
-    workers[i] = worker;
-      
-    worker.addEventListener(
-      'message',
-      workerHandler.bind(null, postMessage)
-    );
-  }
-  return workers;
-}
-
-export function component() {
-  var element = document.createElement('div');
-    element.setAttribute("id", "output");
-  // Lodash, currently included via a script, is required for this line to work
-  //element.innerHTML = _.join(['Hello', 'webpack'], ' ');
-
-  return element;
-}
-
-document.body.appendChild(component());
-
-//createWorkers(workerCount);
-//startMining(workers, 'foo');
+export default Operator;
