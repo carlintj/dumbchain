@@ -16,9 +16,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Output Management',
       template: 'index.template.ejs'
-    })
+    }),
+    new UglifyJSPlugin()
   ],
-  devtool: 'inline-source-map',
+  //devtool: 'inline-source-map',
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist')

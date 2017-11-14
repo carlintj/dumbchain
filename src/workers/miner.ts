@@ -1,4 +1,5 @@
 import * as crypto from 'crypto-js';
+import * as _ from 'lodash';
 
 class Miner {
     working: boolean = true;
@@ -15,7 +16,7 @@ class Miner {
     mine(text : string, seed : number, incrementAmt : number, checkAmount : number,difficulty: number, postMessage : any) {
         let nonce = seed -= incrementAmt;
         let checked = 0;
-        let goal = "0".repeat(difficulty);
+        let goal = _.repeat("0",(difficulty));
         let foundHash = false;
         do {
             nonce += incrementAmt;
